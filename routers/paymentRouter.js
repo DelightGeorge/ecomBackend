@@ -1,15 +1,8 @@
-// routes/paymentRouter.js
 const express = require("express");
 const { isUser } = require("../middlewares/auth");
-const {
-  verifyPayment,
-  initializePayment,
-} = require("../controllers/paymentController");
-
 const paymentRouter = express.Router();
+const { initializePayment, verifyPayment } = require("../controllers/paymentController");
 
-// Protected routes
-paymentRouter.post("/initialize-payment", isUser, initializePayment);
-paymentRouter.post("/verifypayment", isUser, verifyPayment);
-
+paymentRouter.post("/initializePayment", isUser, initializePayment);
+paymentRouter.post("/verifyPayment", isUser, verifyPayment);
 module.exports = paymentRouter;

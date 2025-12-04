@@ -74,7 +74,7 @@ exports.initializePayment = async (req, res) => {
 
 exports.verifyPayment = async (req, res) => {
   try {
-    const { transaction_id } = req.body; // expects POST body
+    const { transaction_id } = req.body; // Expect POST body
     if (!transaction_id)
       return res
         .status(400)
@@ -90,41 +90,42 @@ exports.verifyPayment = async (req, res) => {
     );
     const data = await response.json();
 
-    if (!response.ok) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: data.message || "Failed to verify transaction",
-        });
+    if (!response.ok || data.status !== "success") {
+      return res.status(400).json({
+        success: false,
+        message: data.message || "Failed to verify transaction",
+      });
     }
 
+    // Extract metadata
     const userId = data?.data?.meta?.userId;
-    const order_id = data?.data?.meta?.order_id;
+    const orderId = data?.data?.meta?.order_id; // consistent variable name
     const amount = data?.data?.amount;
     const status = data?.data?.status;
 
-    if (!userId || !order_id)
+    if (!userId || !orderId)
       return res
         .status(400)
-        .json({ success: false, message: "Missing metadata" });
+        .json({ success: false, message: "Missing transaction metadata" });
 
+    // Fetch user
     const user = await prisma.user.findUnique({
-      where: { id: Number(userId) },
+      where: { id: Number(userId) }, // Prisma expects number if id is Int
     });
     if (!user)
       return res
-        .status(400)
+        .status(404)
         .json({ success: false, message: "User not found" });
 
+    // Fetch user cart
     const userCart = await prisma.cart.findUnique({
       where: { userid: Number(userId) },
       include: { Productcart: { include: { product: true } } },
     });
 
-    // Check if receipt already exists (dedupe)
+    // Check if receipt already exists
     let receipt = await prisma.receipt.findUnique({
-      where: { orderId: order_id },
+      where: { orderId },
     });
 
     if (!receipt) {
@@ -132,16 +133,17 @@ exports.verifyPayment = async (req, res) => {
       receipt = await prisma.receipt.create({
         data: {
           orderId,
-          userId: req.user.uuid, // FIXED
-          name,
-          email,
-          phone,
+          userId: user.uuid, // make sure this matches your Prisma User model (String)
+          name: `${user.firstname} ${user.lastname}`,
+          email: user.email,
+          phone: user.phone,
           amount,
-          transactionId,
-          status: "successful",
+          transactionId: transaction_id,
+          status,
         },
       });
 
+      // Add receipt items
       if (userCart?.Productcart?.length) {
         await prisma.receiptItem.createMany({
           data: userCart.Productcart.map((item) => ({
@@ -156,18 +158,17 @@ exports.verifyPayment = async (req, res) => {
       }
     }
 
+    // Return updated receipt with items
     const updatedReceipt = await prisma.receipt.findUnique({
-      where: { orderId: order_id },
+      where: { orderId },
       include: { receiptItems: true },
     });
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Payment verified",
-        data: updatedReceipt,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Payment verified",
+      data: updatedReceipt,
+    });
   } catch (error) {
     console.error("Verify payment error:", error);
     return res
@@ -175,3 +176,5 @@ exports.verifyPayment = async (req, res) => {
       .json({ success: false, message: "Internal server error" });
   }
 };
+
+
