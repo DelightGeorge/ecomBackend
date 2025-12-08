@@ -30,6 +30,31 @@ userRouter.post("/loginUser",  loginUser);
 
 
 
+/** * @swagger
+ * /registerUser:
+ *   post:
+ *    summary: Register a new user
+ *   tags:
+ *    - User
+ *  requestBody:
+ *   required: true
+ *  content:
+ *    multipart/form-data:
+ *     schema:
+ *      type: object
+ *     properties:
+ *      name:
+ *      type: string
+ *     email:
+ *    type: string
+ *    password:
+ *   type: string
+ *   image:
+ *  type: string
+ *     responses:
+ *       200:
+ *         description: User registered successfully
+ */
 userRouter.post("/registerUser", Uploads.single("image"), registerUser);
 
 
