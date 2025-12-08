@@ -26,6 +26,9 @@ const Uploads = require('../middlewares/uploads');
  *         description: Login successful
  */
 userRouter.post("/loginUser",  loginUser);
+
+
+
 userRouter.post("/registerUser", Uploads.single("image"), registerUser);
 
 
