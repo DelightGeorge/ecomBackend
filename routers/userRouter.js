@@ -9,7 +9,7 @@ const Uploads = require('../middlewares/uploads');
  *   post:
  *     summary: 
  *     tags:
- *       - 
+ *      - User
  *     requestBody:
  *       required: true
  *       content:
