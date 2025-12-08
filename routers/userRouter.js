@@ -3,13 +3,13 @@ const userRouter = express.Router();
 const { registerUser, loginUser } = require('../controllers/userController');
 const Uploads = require('../middlewares/uploads');
 
- /**
+/**
  * @swagger
  * /loginUser:
  *   post:
- *     summary: 
+ *     summary: User login
  *     tags:
- *      - User
+ *       - User
  *     requestBody:
  *       required: true
  *       content:
@@ -17,14 +17,15 @@ const Uploads = require('../middlewares/uploads');
  *           schema:
  *             type: object
  *             properties:
- *              email:
- *                type: string
+ *               email:
+ *                 type: string
  *               password:
  *                 type: string
  *     responses:
  *       200:
  *         description: Login successful
  */
+
 userRouter.post("/loginUser",  loginUser);
 
 
