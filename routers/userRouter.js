@@ -25,8 +25,9 @@ const Uploads = require('../middlewares/uploads');
  *       200:
  *         description: Login successful
  */
-userRouter.post("/registerUser", Uploads.single("image"), registerUser);
 userRouter.post("/loginUser",  loginUser);
+userRouter.post("/registerUser", Uploads.single("image"), registerUser);
+
 
 
 module.exports = userRouter;
